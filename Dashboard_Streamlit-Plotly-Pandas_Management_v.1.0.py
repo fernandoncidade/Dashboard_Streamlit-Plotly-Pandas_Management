@@ -38,25 +38,26 @@ col1, col2 = st.columns(2)
 col4, col5, col6 = st.columns(3)
 
 # Verificar se o DataFrame df_filtered contém dados antes de criar o gráfico do Pareto
-if not df_filtered.empty and selected_column != "Selecione uma coluna" and x_axis_column != "Selecione uma coluna":
-    # Gráfico de Pareto
-    df_pareto = df_filtered.groupby(x_axis_column)[selected_column].sum().sort_values(ascending=False).reset_index()
-    df_pareto["pareto_rel"] = (df_pareto[selected_column] / df_pareto[selected_column].sum()) * 100
-    df_pareto["pareto_acum"] = df_pareto["pareto_rel"].cumsum()
+if df_filtered is not None and selected_column is not None and x_axis_column is not None:
+    if not df_filtered.empty and selected_column != "Selecione uma coluna" and x_axis_column != "Selecione uma coluna":
+        # Gráfico de Pareto
+        df_pareto = df_filtered.groupby([x_axis_column])[selected_column].sum().sort_values(ascending=False).reset_index()
+        df_pareto["pareto_rel"] = (df_pareto[selected_column] / df_pareto[selected_column].sum()) * 100
+        df_pareto["pareto_acum"] = df_pareto["pareto_rel"].cumsum()
 
-    # Criando uma segunda escala para a curva de Pareto
-    fig_pareto = go.Figure()
-    fig_pareto.add_trace(go.Bar(x=df_pareto[x_axis_column], y=df_pareto[selected_column], text=df_pareto["pareto_rel"], textposition="auto", name=selected_column))
-    fig_pareto.add_trace(go.Scatter(x=df_pareto[x_axis_column], y=df_pareto["pareto_acum"], mode="lines", name="Curva de Pareto", yaxis="y2"))
+        # Criando uma segunda escala para a curva de Pareto
+        fig_pareto = go.Figure()
+        fig_pareto.add_trace(go.Bar(x=df_pareto[x_axis_column], y=df_pareto[selected_column], text=df_pareto["pareto_rel"], textposition="auto", name=selected_column))
+        fig_pareto.add_trace(go.Scatter(x=df_pareto[x_axis_column], y=df_pareto["pareto_acum"], mode="lines", name="Curva de Pareto", yaxis="y2"))
 
-    # Adicionando rótulos aos eixos
-    fig_pareto.update_layout(
-        xaxis=dict(title=x_axis_column),
-        yaxis=dict(title=selected_column, side="left"),
-        yaxis2=dict(title="Curva de Pareto", side="right", overlaying="y", showgrid=False),
-        title="Diagrama de Pareto",
-    )
-    col3[0].plotly_chart(fig_pareto, use_container_width=True)
+        # Adicionando rótulos aos eixos
+        fig_pareto.update_layout(
+            xaxis=dict(title=x_axis_column),
+            yaxis=dict(title=selected_column, side="left"),
+            yaxis2=dict(title="Curva de Pareto", side="right", overlaying="y", showgrid=False),
+            title="Diagrama de Pareto",
+        )
+        col3[0].plotly_chart(fig_pareto, use_container_width=True)
 
 # Gráfico de barras para o faturamento por dia
 fig_date = px.bar(df_filtered, x="Date", y="Total", color="City", title="Faturamento por dia")
